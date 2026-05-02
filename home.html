@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Air Quality Monitor</title>
+
+  <style>
+    /* General Reset */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #fff;
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+      background-size: 400% 400%;
+      animation: gradient 15s ease infinite;
+    }
+
+    /* ---------- AQI LEGEND SECTION ---------- */
+
+    #aqi-legend {
+      margin-top: 3rem;
+      text-align: center;
+    }
+
+    #aqi-legend h2 {
+      font-size: 2rem;
+      margin-bottom: 1.5rem;
+      font-weight: 700;
+      text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.35);
+    }
+
+    /* Container Grid */
+    .legend-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 22px;
+      padding: 1rem;
+    }
+
+    /* Card Base Style */
+    .legend-item {
+      padding: 1.5rem 1rem;
+      border-radius: 12px;
+      color: #fff;
+      font-weight: 500;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      backdrop-filter: blur(6px);
+    }
+
+    .legend-item:hover {
+      transform: translateY(-6px) scale(1.02);
+      box-shadow: 0 12px 25px rgba(0, 0, 0, 0.35);
+    }
+
+    .legend-item h3 {
+      margin-top: 0.7rem;
+      font-size: 1.4rem;
+    }
+
+    .legend-item p {
+      font-size: 0.95rem;
+      margin-top: 0.5rem;
+      line-height: 1.4;
+    }
+
+    /* AQI Number Circle */
+    .aqi-score {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 55px;
+      height: 55px;
+      border-radius: 50%;
+      font-size: 1.4rem;
+      font-weight: 700;
+      background: rgba(255, 255, 255, 0.2);
+      border: 2px solid rgba(255, 255, 255, 0.6);
+    }
+
+    /* AQI COLOR SCALE */
+
+    /* Good (Green) */
+    .good {
+      background: linear-gradient(135deg, #00e400, #009966);
+    }
+
+    /* Fair (Light Green) */
+    .fair {
+      background: linear-gradient(135deg, #9cff00, #6cc644);
+    }
+
+    /* Moderate (Yellow) */
+    .moderate {
+      background: linear-gradient(135deg, #ffde33, #ffb300);
+      color: #222;
+    }
+
+    .moderate .aqi-score {
+      color: #222;
+      border-color: rgba(0, 0, 0, 0.3);
+    }
+
+    /* Poor (Orange) */
+    .poor {
+      background: linear-gradient(135deg, #ff9933, #ff6600);
+    }
+
+    /* Very Poor (Red/Purple) */
+    .very-poor {
+      background: linear-gradient(135deg, #cc0033, #660099);
+    }
+
+    @keyframes gradient {
+      0% {
+        background-position: 0% 50%;
+      }
+
+      50% {
+        background-position: 100% 50%;
+      }
+
+      100% {
+        background-position: 0% 50%;
+      }
+    }
+
+    header {
+      background: linear-gradient(90deg, #3fc0ef, #0288d1);
+      padding: 1.5rem 2rem;
+      text-align: center;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 2.5rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    /* Search Bar Section */
+    nav.menu {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 1rem 0;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    nav.menu input[type="text"] {
+      width: 300px;
+      max-width: 90vw;
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      border: none;
+      border-radius: 25px;
+      outline: none;
+      transition: box-shadow 0.3s ease;
+    }
+
+    nav.menu input[type="text"]:focus {
+      box-shadow: 0 0 8px rgba(255, 255, 255, 0.7);
+    }
+
+    nav.menu button {
+      background-color: rgba(0, 0, 0, 0.4);
+      color: #fff;
+      border: none;
+      border-radius: 25px;
+      padding: 0.55rem 1.5rem;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    nav.menu button:hover {
+      background-color: rgba(0, 0, 0, 0.6);
+    }
+
+    /* Navigation Links */
+    nav.links {
+      background-color: rgba(255, 255, 255, 0.15);
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      padding: 1rem 0;
+      border-radius: 8px;
+      margin: 0 1rem;
+      flex-wrap: wrap;
+    }
+
+    nav.links a {
+      text-decoration: none;
+      color: #fff;
+      font-weight: 600;
+      padding: 0.3rem 0.6rem;
+      border-radius: 5px;
+      transition: background-color 0.3s ease;
+      font-size: 1.1rem;
+    }
+
+    nav.links a:hover {
+      background-color: rgba(0, 0, 0, 0.4);
+    }
+
+    main {
+      flex-grow: 1;
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+
+    /* Introduction Text */
+    section#intro {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    section#intro p {
+      font-size: 1.25rem;
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    /* Air Quality Info Boxes */
+    section#air-quality {
+      padding: 2rem;
+      border-radius: 10px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      color: #fff;
+    }
+
+    .box {
+      background-color: rgba(255, 255, 255, 0.15);
+      /* transparent */
+      backdrop-filter: blur(8px);
+      /* frosted glass effect */
+      -webkit-backdrop-filter: blur(8px);
+      /* Safari */
+      border-radius: 10px;
+      padding: 1.5rem 1rem;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      text-align: center;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .box:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .box h3 {
+      margin-bottom: 0.5rem;
+      font-size: 1.3rem;
+    }
+
+    .box p {
+      font-size: 1.1rem;
+    }
+
+    footer {
+      text-align: center;
+      padding: 1rem 0;
+      background-color: rgba(0, 0, 0, 0.3);
+      font-weight: 600;
+      margin-top: auto;
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      nav.menu {
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      nav.menu input[type="text"] {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <h1>Global Air Quality Monitor</h1>
+  </header>
+
+  <nav class="links" aria-label="Primary navigation">
+    <a href="home.html">Home</a>
+    <a href="homePage.php">Search</a>
+    <a href="compare.html">Compare</a>
+    <a href="history.php">History</a>
+    <a href="logout.php">Logout</a>
+
+  </nav>
+
+  <main>
+    <section id="intro">
+      <p>
+        Welcome to the Weather & Air Quality Monitor. Use our Search tool to find real-time air quality data for any
+        location worldwide.
+      </p>
+    </section>
+
+    <!-- AQI Legend Section -->
+    <section id="aqi-legend">
+      <h2>Understanding the Air Quality Index (AQI)</h2>
+      <div class="legend-container">
+        <div class="legend-item good">
+          <span class="aqi-score">1</span>
+          <h3>Good</h3>
+          <p>Air quality is satisfactory, and air pollution poses little or no risk.</p>
+        </div>
+        <div class="legend-item fair">
+          <span class="aqi-score">2</span>
+          <h3>Fair</h3>
+          <p>Air quality is acceptable. However, there may be a risk for some people, particularly those who are
+            unusually sensitive to air pollution.</p>
+        </div>
+        <div class="legend-item moderate">
+          <span class="aqi-score">3</span>
+          <h3>Moderate</h3>
+          <p>Members of sensitive groups may experience health effects. The general public is less likely to be
+            affected.</p>
+        </div>
+        <div class="legend-item poor">
+          <span class="aqi-score">4</span>
+          <h3>Poor</h3>
+          <p>Everyone may begin to experience health effects; members of sensitive groups may experience more serious
+            health effects.</p>
+        </div>
+        <div class="legend-item very-poor">
+          <span class="aqi-score">5</span>
+          <h3>Very Poor</h3>
+          <p>Health warnings of emergency conditions. The entire population is more likely to be affected.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    &copy; 2025 Weather & Air Quality Monitor. All rights reserved.
+  </footer>
+
+</body>
+
+</html>
